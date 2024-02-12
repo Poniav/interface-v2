@@ -15,6 +15,8 @@
 	import { approveToken } from '$lib/controllers/contract/token';
 	import { doNothing } from '$lib/utils/helpers/commonHelper';
 	import { epochToDurationString } from '$lib/utils/helpers/conversionHelper';
+	import { staticImages } from '$lib/components/images/staticImages';
+	import { buttonClasses } from '$lib/atoms/componentClasses';
 
 	let pageTitle = 'Marlin Receiver Staking Portal (Ignore this part)';
 	let epochNumber = 0;
@@ -99,4 +101,90 @@
 	<input bind:value={epochNumber} type="number" />
 	<br />
 	{epochToDurationString(epochNumber)}
+
+	<div class="mt-[1000px] flex justify-center gap-6">
+		<div>
+			<a
+				class="flex w-fit items-center gap-3 rounded-xl bg-white px-5 py-6 hover:bg-white/75"
+				href="/"
+			>
+				<!-- <img class="h-11" src={staticImages.ArbitrumLogo} alt="some logo bs" /> -->
+				<div class="mr-2 flex items-start text-sm">
+					<span class="">Get your on-chain domain with 3DNS</span>
+				</div>
+				<img class="mb-auto" src={staticImages.OpenInNew} alt="Open" />
+			</a>
+			<div class="my-8"></div>
+			<a
+				class="flex w-fit min-w-[280px] flex-col gap-4 rounded-xl bg-white px-6 py-5 hover:bg-white/75"
+				href="/"
+			>
+				<div class="flex items-start justify-between">
+					<!-- <img class="h-11" src={staticImages.ArbitrumLogo} alt="some logo bs" /> -->
+					<img src={staticImages.OpenInNew} alt="Open" />
+				</div>
+				<div class="mr-2 flex flex-col items-start text-sm">
+					<span class="font-medium">Personalise your site</span><span
+						>create a free domain on xyz</span
+					>
+				</div>
+			</a>
+			<div class="my-8"></div>
+			<a
+				class="flex w-fit min-w-[280px] flex-col gap-2 rounded-xl bg-white px-6 py-5 hover:bg-white/75"
+				href="/"
+			>
+				<div class="flex items-start">
+					<!-- <img class="h-9" src={staticImages.ArbitrumLogo} alt="some logo bs" /> -->
+				</div>
+				<div class="flex items-center justify-between">
+					<span class="text-lg">Documentation</span>
+					<div class="rounded-md bg-base-300 p-3">
+						<img class="h-3" src={staticImages.OpenInNew} alt="Open" />
+					</div>
+				</div>
+			</a>
+		</div>
+		<div>
+			<a class="btn-lightblue flex w-fit items-center gap-3 rounded-xl px-5 py-6" href="/">
+				<!-- <img class="h-11" src={staticImages.ArbitrumLogo} alt="some logo bs" /> -->
+				<div class="mr-2 flex flex-col items-start text-sm">
+					<span class="font-medium">Personalise your site</span><span>create a free domain</span>
+				</div>
+				<img class="mb-auto" src={staticImages.OpenInNew} alt="Open" />
+			</a>
+			<div class="my-8"></div>
+			<a
+				class="btn-lightblue flex w-fit min-w-[280px] flex-col gap-4 rounded-xl px-6 py-5"
+				href="/"
+			>
+				<div class="flex items-start justify-between">
+					<!-- <img class="h-11" src={staticImages.ArbitrumLogo} alt="some logo bs" /> -->
+					<img src={staticImages.OpenInNew} alt="Open" />
+				</div>
+				<div class="mr-2 flex flex-col items-start text-sm">
+					<span class="font-medium">Personalise your site</span><span
+						>create a free domain on xyz</span
+					>
+				</div>
+			</a>
+			<div class="my-8"></div>
+			<a
+				class="btn-lightblue flex w-fit min-w-[280px] flex-col gap-2 rounded-xl px-6 py-5"
+				href="/"
+			>
+				<div class="flex items-start">
+					<!-- <img class="h-9" src={staticImages.ArbitrumLogo} alt="some logo bs" /> -->
+				</div>
+				<div class="flex items-center justify-between">
+					<span class="text-lg">Documentation</span>
+					<div class="rounded-md bg-base-300 p-3">
+						<img class="h-3" src={staticImages.OpenInNew} alt="Open" />
+					</div>
+				</div>
+			</a>
+		</div>
+	</div>
+
+	<div class="mb-96"></div>
 </div>
