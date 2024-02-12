@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SausageLink > renders without errors 1`] = `
+<body>
+  <div>
+    <a
+      class="flex w-fit items-center gap-2 rounded-lg bg-white px-4 py-3 hover:bg-white/75"
+      href="/"
+      target="_blank"
+    >
+      <div
+        class="mr-1 flex flex-col items-start text-sm font-medium"
+      >
+        This is text for sausage link 🌭
+      </div>
+       
+      <img
+        alt="Open"
+        class="my-auto"
+        src="/images/openinnew.svg"
+      />
+    </a>
+    <!--&lt;SausageLink&gt;-->
+  </div>
+</body>
+`;
