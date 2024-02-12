@@ -2,7 +2,7 @@
 	import { staticImages } from '$lib/components/images/staticImages';
 
 	export let href = '/';
-	export let text = 'Get your on-chain domain with 3DNS';
+	export let text = 'This is text for sausage link 🌭';
 </script>
 
 <a
@@ -11,7 +11,7 @@
 	target="_blank"
 >
 	<div class="mr-1 flex flex-col items-start text-sm font-medium">
-		<span class="">{text}</span>
+		{text}
 	</div>
 	<img class="my-auto" src={staticImages.OpenInNew} alt="Open" />
 </a>
