@@ -12,6 +12,8 @@
 	import OysterMarketplaceFilters from '$lib/page-components/oyster/marketplace/OysterMarketplaceFilters.svelte';
 	import OysterMarketplaceTableRow from '$lib/page-components/oyster/marketplace/OysterMarketplaceTableRow.svelte';
 	import { TABLE_ITEMS_PER_PAGE } from '$lib/utils/constants/constants';
+	import SausageLink from '$lib/atoms/buttons/SausageLink.svelte';
+	import { CTA_FOR_3DNS_LINK } from '$lib/utils/constants/urls';
 
 	let activePage = 1;
 	let sortingMap: Record<string, 'asc' | 'desc'> = {};
@@ -51,7 +53,10 @@
 </script>
 
 <div class="mx-auto">
-	<PageTitle title="Infrastructure Providers" />
+	<div class="flex items-start justify-between">
+		<PageTitle title="Infrastructure Providers" />
+		<SausageLink href={CTA_FOR_3DNS_LINK} text="Get your on-chain domain with 3DNS" />
+	</div>
 	<OysterMarketplaceFilters bind:filteredData bind:filterMap {onFilterClick} />
 	<OysterTableCommon
 		walletConnectionRequired={false}

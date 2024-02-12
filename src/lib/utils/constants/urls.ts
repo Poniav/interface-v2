@@ -3,6 +3,7 @@
 
 // general links
 export const DISCORD_LINK = 'https://discord.gg/xqJfSGY6gR';
+export const CTA_FOR_3DNS_LINK = 'https://bit.ly/3BlS71b';
 
 //bridge links
 export const BRIDGE_LEARN_MORE_DOC_LINK = 'https://docs.marlin.org/docs/Learn/Bridges/';
