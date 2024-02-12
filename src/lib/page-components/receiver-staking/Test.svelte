@@ -15,6 +15,7 @@
 	import { approveToken } from '$lib/controllers/contract/token';
 	import { doNothing } from '$lib/utils/helpers/commonHelper';
 	import { epochToDurationString } from '$lib/utils/helpers/conversionHelper';
+	import AddTokenPrompt from '$lib/components/prompts/AddTokenPrompt.svelte';
 	import { staticImages } from '$lib/components/images/staticImages';
 	import { buttonClasses } from '$lib/atoms/componentClasses';
 
@@ -101,6 +102,9 @@
 	<input bind:value={epochNumber} type="number" />
 	<br />
 	{epochToDurationString(epochNumber)}
+	<div class="mb-28 flex justify-center gap-3">
+		<AddTokenPrompt />
+	</div>
 
 	<div class="mt-[1000px] flex justify-center gap-6">
 		<div>

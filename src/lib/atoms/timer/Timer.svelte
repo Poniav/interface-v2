@@ -19,7 +19,7 @@
 	}, 1000);
 </script>
 
-<div id={timerId} class="flex items-center gap-1">
+<div id={timerId} data-testid="timer" class="flex items-center gap-1">
 	{#if original > 0}
 		<slot name="active" timer={original} />
 	{:else}

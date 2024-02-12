@@ -36,8 +36,12 @@
 		/>
 		{#if cliboardContent !== '' && cliboardContent !== undefined}
 			<button
-				class="ml-2 cursor-pointer"
-				on:click={() => handleCopyClick(cliboardContent, successMessage)}
+				class="ml-2 w-6 cursor-pointer"
+				on:click={(e) => {
+					const element = e.currentTarget;
+					element.setAttribute('id', 'text-input-card-button');
+					handleCopyClick(cliboardContent, successMessage);
+				}}
 			>
 				<ImageColored src={staticImages.CopyGrey} alt="Copy" variant="grey" />
 			</button>
