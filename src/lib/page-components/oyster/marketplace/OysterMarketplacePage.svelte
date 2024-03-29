@@ -21,16 +21,22 @@
 	let previousChainId: number | null = null;
 
 	const handleSortData = (id: string) => {
+		console.log(previousChainId, $chainStore.chainId);
+		// if(previousChainId !== $chainStore.chainId) {
+
+		// }
 		if (sortingMap[id]) {
 			sortingMap[id] = sortingMap[id] === 'asc' ? 'desc' : 'asc';
 		} else {
 			sortingMap[id] = 'asc';
 		}
+		console.log({ sortingMap, filteredData });
 		filteredData = sortOysterMarketplace(
-			filteredData,
+			filteredData || $oysterStore.allMarketplaceData,
 			id as OysterMarketplaceSortKeys,
 			sortingMap[id]
 		);
+		console.log({ filteredData });
 	};
 
 	const handlePageChange = (page: number) => {
@@ -50,6 +56,7 @@
 		if (chainIdHasChanged(currentChainId, previousChainId)) {
 			previousChainId = currentChainId;
 			filterMap = {};
+			filteredData = null;
 			return _allMarketplaceData;
 		} else if (_filterMap && Object.keys(_filterMap).length > 0) {
 			return _filteredData;
@@ -71,6 +78,10 @@
 		(activePage - 1) * TABLE_ITEMS_PER_PAGE,
 		activePage * TABLE_ITEMS_PER_PAGE
 	);
+	console.log({ paginatedData });
+	console.log({ tableData });
+	console.log({ pageCount });
+	console.log($oysterStore.allMarketplaceData);
 </script>
 
 <div class="mx-auto">

@@ -36,7 +36,9 @@
 		const previousFilters = {
 			...allFilters
 		};
-
+		console.log({
+			filterMap
+		});
 		filteredData = getSearchAndFilteredMarketplaceData(
 			$oysterStore.allMarketplaceData,
 			filterMap,
