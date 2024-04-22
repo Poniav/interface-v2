@@ -1,178 +1,224 @@
 <script lang="ts">
-	import Button from '$lib/atoms/v2/buttons/Button.svelte';
-	import Modal from '$lib/atoms/v2/modals/Modal.svelte';
+	import ErrorTextCard from '$lib/components/cards/ErrorTextCard.svelte';
+	import AmountInputWithTitle from '$lib/components/v2/inputs/AmountInputWithTitle.svelte';
+	import Select from '$lib/components/select/Select.svelte';
+	import { walletBalanceStore } from '$lib/data-stores/walletProviderStore';
 	import {
-		oysterStore,
-		oysterTokenMetadataStore,
-		oysterRateMetadataStore
-	} from '$lib/data-stores/oysterStore';
-	import { connected, walletBalanceStore } from '$lib/data-stores/walletProviderStore';
-	import type { OysterInventoryDataModel } from '$lib/types/oysterComponentType';
-	import { closeModal } from '$lib/utils/helpers/commonHelper';
+		DEFAULT_OYSTER_DURATION_UNIT,
+		OYSTER_DURATION_UNITS_LIST,
+		OYSTER_MARLIN_CREDIT_METADATA
+	} from '$lib/utils/constants/oysterConstants';
 	import {
-		handleAddCreditsToJob,
-		handleAddFundsToJob,
-		handleApproveFundForOysterJob
-	} from '$lib/utils/services/oysterServices';
-	import AddFundsToJob from '$lib/page-components/v2/oyster/sub-components/AddFundsToJob.svelte';
-	import MaxButton from '$lib/components/v2/buttons/MaxButton.svelte';
-	import Text from '$lib/atoms/texts/Text.svelte';
-	import { bigNumberToString } from '$lib/utils/helpers/conversionHelper';
-	import { contractAddressStore } from '$lib/data-stores/contractStore';
+		bigNumberToString,
+		convertHourlyRateToSecondlyRate,
+		convertRateToPerHourString,
+		stringToBigNumber
+	} from '$lib/utils/helpers/conversionHelper';
+	import { isInputAmountValid } from '$lib/utils/helpers/commonHelper';
+	import {
+		computeCost,
+		computeDuration,
+		computeDurationString,
+		getDurationInSecondsForUnit
+	} from '$lib/utils/helpers/oysterHelpers';
 	import type { WalletBalanceStore } from '$lib/types/storeTypes';
-	import Divider from '$lib/atoms/divider/Divider.svelte';
-	import { OYSTER_MARLIN_CREDIT_METADATA } from '$lib/utils/constants/oysterConstants';
+	import {
+		oysterTokenMetadataStore,
+		oysterRateMetadataStore,
+		oysterStore
+	} from '$lib/data-stores/oysterStore';
 
-	export let modalFor: string;
-	export let jobData: OysterInventoryDataModel;
+	const durationUnitList = OYSTER_DURATION_UNITS_LIST.map((unit) => unit.label);
 
-	let duration: number | undefined = undefined; //durationInSecs
-	let instanceCostScaled = 0n;
-	let invalidCost = false;
-	let durationUnitInSec: number;
-	//loading states
-	let submitLoading = false;
-	let approvedLoading = false;
-	let approved = false;
-	let instanceCostString = '';
+	export let instanceRate: bigint | undefined;
+	export let duration: number | undefined;
+	export let instanceCostScaled: bigint;
+	export let invalidCost = false;
+	export let instanceCostString = '';
+	export let isTotalRate = false;
+	export let durationUnitInSec = getDurationInSecondsForUnit(DEFAULT_OYSTER_DURATION_UNIT);
+	export let useMarlinCredits = false;
 
-	function handleMaxClick() {
-		if (isCreditJob) {
-			instanceCostString = bigNumberToString(
-				walletBalance,
-				OYSTER_MARLIN_CREDIT_METADATA.decimal,
-				OYSTER_MARLIN_CREDIT_METADATA.precision,
-				false
-			);
-		} else {
-			instanceCostString = bigNumberToString(
-				walletBalance,
-				$oysterTokenMetadataStore.decimal,
-				4,
-				false
-			);
+	let durationUnit = DEFAULT_OYSTER_DURATION_UNIT;
+	let instanceRateString = '';
+
+	const updateRateString = (_instanceRate: bigint | undefined) => {
+		if (_instanceRate) {
+			instanceRateString = _instanceRate
+				? convertRateToPerHourString(
+						_instanceRate / $oysterRateMetadataStore.oysterRateScalingFactor,
+						$oysterTokenMetadataStore.decimal,
+						4
+					)
+				: '';
+			return;
 		}
-		duration = Number(
-			(walletBalance * $oysterRateMetadataStore.oysterRateScalingFactor) / rateScaled
+		if (!_instanceRate && instanceRateString !== '') {
+			instanceRateString = '';
+			return;
+		}
+	};
+
+	const handleRateChange = (e: any) => {
+		const value = e.target.value;
+		instanceRateString = value;
+		if (!value) {
+			instanceRate = undefined;
+			instanceCostString = '';
+			return;
+		}
+		try {
+			if (isInputAmountValid(value)) {
+				const hourlyRate = stringToBigNumber(value);
+				instanceRate = convertHourlyRateToSecondlyRate(hourlyRate);
+				const _instanceCostScaled = computeCost(duration || 0, instanceRate);
+				instanceCostString = bigNumberToString(
+					_instanceCostScaled / $oysterRateMetadataStore.oysterRateScalingFactor,
+					$oysterTokenMetadataStore.decimal,
+					4
+				);
+			}
+		} catch (error) {
+			instanceRate = undefined;
+			instanceCostString = '';
+			console.log(error);
+		}
+	};
+
+	const handleDurationChange = (e: any) => {
+		const value = e.target.value;
+		try {
+			duration = computeDuration(value, durationUnitInSec);
+			const _instanceCostScaled = computeCost(duration || 0, instanceRate);
+			instanceCostString = bigNumberToString(
+				_instanceCostScaled / $oysterRateMetadataStore.oysterRateScalingFactor,
+				$oysterTokenMetadataStore.decimal,
+				4
+			);
+		} catch (error) {
+			duration = 0;
+			console.log(error);
+		}
+	};
+
+	const handleDurationUnitChange = (unit: any) => {
+		durationUnitInSec = getDurationInSecondsForUnit(unit);
+		duration = computeDuration(durationString, durationUnitInSec);
+		const _instanceCostScaled = computeCost(duration || 0, instanceRate);
+		instanceCostString = bigNumberToString(
+			_instanceCostScaled / $oysterRateMetadataStore.oysterRateScalingFactor,
+			$oysterTokenMetadataStore.decimal,
+			4
+		);
+	};
+
+	const handleCostChange = (e: any) => {
+		const value = e.target.value;
+		const _instanceCost = isInputAmountValid(value) ? Number(value) : 0;
+
+		if (!value) {
+			duration = 0;
+			instanceCostString = '';
+			return;
+		}
+		if (_instanceCost === 0) {
+			duration = 0;
+			return;
+		}
+		if (_instanceCost && instanceRate) {
+			try {
+				let _instanceRate = Number(instanceRate) / 10 ** $oysterTokenMetadataStore.decimal;
+				duration = Math.floor(_instanceCost / _instanceRate);
+				instanceCostString = value;
+			} catch (error) {
+				duration = 0;
+				instanceCostString = '';
+				console.log(error);
+			}
+		}
+	};
+
+	function isCostValid(instanceCostScaled: bigint, useMarlinCredits: boolean) {
+		const walletBalance = useMarlinCredits
+			? $oysterStore.credits.balance
+			: $walletBalanceStore[
+					$oysterTokenMetadataStore.currency.toLowerCase() as keyof WalletBalanceStore
+				];
+		return Boolean(
+			instanceCostScaled &&
+				instanceCostScaled / $oysterRateMetadataStore.oysterRateScalingFactor <= walletBalance
 		);
 	}
 
-	//reset amount
-	const resetInputs = () => {
-		duration = undefined;
-		invalidCost = false;
-		instanceCostString = '';
-		approvedLoading = false;
-		submitLoading = false;
-	};
-
-	const handleApproveClick = async () => {
-		approvedLoading = true;
-		await handleApproveFundForOysterJob(
-			instanceCostScaled / $oysterRateMetadataStore.oysterRateScalingFactor,
-			$oysterTokenMetadataStore,
-			$contractAddressStore.OYSTER
-		);
-		approvedLoading = false;
-	};
-
-	const handleSubmitClick = async () => {
-		submitLoading = true;
-		const amount = instanceCostScaled / $oysterRateMetadataStore.oysterRateScalingFactor;
-
-		if (isCreditJob) {
-			await handleAddCreditsToJob(jobData, amount, duration ?? 0);
-		} else {
-			await handleAddFundsToJob(jobData, amount, duration ?? 0);
+	function getInvalidMessage(
+		instanceCostScaled: bigint,
+		invalidCost: boolean,
+		useMarlinCredits: boolean
+	) {
+		if (!instanceCostScaled) {
+			return '';
 		}
+		if (invalidCost) {
+			const walletBalanceString = useMarlinCredits
+				? bigNumberToString($oysterStore.credits.balance, OYSTER_MARLIN_CREDIT_METADATA.decimal)
+				: bigNumberToString(
+						$walletBalanceStore[
+							$oysterTokenMetadataStore.currency.toLowerCase() as keyof WalletBalanceStore
+						],
+						$oysterTokenMetadataStore.decimal
+					);
+			const currency = useMarlinCredits
+				? OYSTER_MARLIN_CREDIT_METADATA.currency.split('_')[1]
+				: $oysterTokenMetadataStore.currency;
 
-		submitLoading = false;
-		resetInputs();
-		closeModal(modalFor);
-	};
+			return `Insufficient balance. Your current wallet has ${walletBalanceString} ${currency}.`;
+		}
+		return '';
+	}
 
-	$: ({ rateScaled, isCreditJob } = jobData);
-	$: walletBalance = isCreditJob
-		? $oysterStore.credits.balance
-		: $walletBalanceStore[
-				$oysterTokenMetadataStore.currency.toLowerCase() as keyof WalletBalanceStore
-			];
-	$: approved =
-		connected &&
-		Boolean(instanceCostScaled) &&
-		$oysterStore.allowance >=
-			instanceCostScaled / BigInt($oysterRateMetadataStore.oysterRateScalingFactor) &&
-		instanceCostScaled > 0n;
-	$: approveEnable = connected && !submitLoading && instanceCostScaled > 0n && !invalidCost;
-	$: confirmEnable = isCreditJob ? approveEnable : approved && approveEnable;
+	$: updateRateString(instanceRate);
+	$: durationString = computeDurationString(duration, durationUnitInSec);
+	$: instanceCostScaled = computeCost(duration || 0, instanceRate);
+	$: invalidCost = !isCostValid(instanceCostScaled, useMarlinCredits);
+	$: inValidMessage = getInvalidMessage(instanceCostScaled, invalidCost, useMarlinCredits);
 </script>
 
-<Modal {modalFor} onClose={resetInputs} padding={false}>
-	<svelte:fragment slot="title">Add Funds</svelte:fragment>
-	<svelte:fragment slot="content">
-		<div class="flex flex-col gap-2">
-			<AddFundsToJob
-				bind:duration
-				bind:invalidCost
-				bind:instanceCostScaled
-				bind:instanceCostString
-				bind:durationUnitInSec
-				bind:useMarlinCredits={isCreditJob}
-				instanceRate={rateScaled}
-				isTotalRate={true}
+<div class="flex gap-4">
+	<AmountInputWithTitle
+		title="Hourly Rate"
+		id="Hourly-Rate"
+		bind:inputAmountString={instanceRateString}
+		prefix={$oysterTokenMetadataStore.symbol}
+		handleUpdatedAmount={handleRateChange}
+		disabled={true}
+	/>
+	<AmountInputWithTitle
+		title="Duration"
+		id="Duration"
+		bind:inputAmountString={durationString}
+		handleUpdatedAmount={handleDurationChange}
+		onlyInteger
+		disabled={!instanceRate}
+	>
+		<div slot="endButton">
+			<Select
+				title="Duration"
+				dataList={durationUnitList}
+				bind:value={durationUnit}
+				setValue={handleDurationUnitChange}
+				showLabel
 			/>
 		</div>
-		<div class="my-4 flex items-center justify-end">
-			<div class="flex items-center gap-2">
-				<MaxButton onclick={handleMaxClick} />
-				<Divider direction="divider-vertical" />
-				{#if isCreditJob}
-					<Text
-						variant="small"
-						styleClass="text-gray-400"
-						fontWeight="font-normal"
-						text="Balance:
-					{bigNumberToString(
-							walletBalance,
-							OYSTER_MARLIN_CREDIT_METADATA.decimal,
-							OYSTER_MARLIN_CREDIT_METADATA.decimal
-						)} {OYSTER_MARLIN_CREDIT_METADATA.currency.split('_')[1]}"
-					/>
-				{:else}
-					<Text
-						variant="small"
-						styleClass="text-gray-400"
-						fontWeight="font-normal"
-						text="Balance:
-						{bigNumberToString(
-							walletBalance,
-							$oysterTokenMetadataStore.decimal,
-							4
-						)} {$oysterTokenMetadataStore.currency}"
-					/>
-				{/if}
-			</div>
-		</div>
-	</svelte:fragment>
-	<svelte:fragment slot="actionButtons">
-		{#if !approved && !isCreditJob}
-			<Button
-				variant="filled"
-				disabled={!approveEnable}
-				loading={approvedLoading}
-				onclick={handleApproveClick}
-				size="large"
-				styleClass="btn-block w-full my-0">APPROVE</Button
-			>
-		{:else}
-			<Button
-				variant="filled"
-				disabled={!confirmEnable}
-				loading={submitLoading}
-				onclick={handleSubmitClick}
-				size="large"
-				styleClass="btn-block w-full my-0">CONFIRM</Button
-			>
-		{/if}
-	</svelte:fragment>
-</Modal>
+	</AmountInputWithTitle>
+	<AmountInputWithTitle
+		title={isTotalRate ? 'Total Cost' : 'Instance Cost'}
+		id="cost"
+		bind:inputAmountString={instanceCostString}
+		handleUpdatedAmount={handleCostChange}
+		suffix={useMarlinCredits
+			? OYSTER_MARLIN_CREDIT_METADATA.currency.split('_')[1]
+			: $oysterTokenMetadataStore.currency}
+		disabled={!instanceRate}
+	/>
+</div>
+<ErrorTextCard styleClass="mt-0" showError={inValidMessage !== ''} errorMessage={inValidMessage} />
