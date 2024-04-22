@@ -16,6 +16,8 @@
 
 	const onBlurStyle = 'top-0 left-0 mt-1.5 font-medium';
 	const onFocusStyle = ' left-[12px] top-[-20px] mb-4 font-light';
+	const titleStyleInit =
+		'absolute z-10 cursor-text bg-white px-1 font-poppins  text-sm text-[#030115] transition-all';
 
 	let titleStyle = onFocusStyle;
 
@@ -41,23 +43,19 @@
 			const elementToFocus: HTMLElement | null = document.getElementById(`title-cost`);
 
 			if (!!inputAmountString.length && elementToFocus) {
-				elementToFocus.className =
-					'left-[12px] top-[-20px] mb-4 font-light absolute z-10 bg-white px-1 font-poppins text-sm text-[#030115] transition-all';
+				elementToFocus.className = ` ${onFocusStyle} ${titleStyleInit}`;
 			} else if (elementToFocus) {
-				elementToFocus.className =
-					'top-0 left-0 mt-1.5 font-medium font-light absolute z-10 bg-white px-1 font-poppins text-sm text-[#030115] transition-all';
+				elementToFocus.className = ` ${onBlurStyle} ${titleStyleInit}`;
 			}
 		}
 	};
 
 	function focusElement() {
 		const eleToFocus: HTMLElement | null = document.getElementById(`pond-input-amount-${id}`);
-
 		if (eleToFocus) {
 			eleToFocus.focus();
 		}
 	}
-
 	if (!disabled) {
 		titleStyle = onBlurStyle;
 	}
@@ -65,14 +63,7 @@
 
 <InputCard variant="search" styleClass="border border-[#D9DADE]">
 	<div class="relative flex flex-1 flex-col">
-		<button
-			class={cn(
-				titleStyle,
-				'absolute z-10 cursor-text bg-white px-1 font-poppins  text-sm text-[#030115] transition-all'
-			)}
-			id="title-{id}"
-			on:click={focusElement}
-		>
+		<button class={cn(titleStyle, titleStyleInit)} id="title-{id}" on:click={focusElement}>
 			{title}
 		</button>
 	</div>
