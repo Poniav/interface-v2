@@ -31,7 +31,8 @@ export const tableClasses = {
 	row: 'border-b border-[#D9DADE] font-normal whitespace-nowrap last:border-b-0',
 	cell: 'text-left text-sm py-[23.5px] leading-none',
 	cellMini: 'text-xs py-1',
-	empty: 'text-base text-center p-4 w-full'
+	empty: 'text-base text-center p-4 w-full',
+	mainRow: ''
 };
 
 export const inputClasses = {
